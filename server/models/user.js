@@ -1,7 +1,11 @@
 import mongoose from 'mongoose';
 
 const userSchema = mongoose.Schema({
-    sub: {
+    twitchId: {
+      type: String,
+      required: true
+    },
+    isSubbed: {
         type: Boolean
     },
     isEarly: {
@@ -37,6 +41,20 @@ const userSchema = mongoose.Schema({
       }
     }
 });
+
+loyalties: {
+  channelId: { //new object for each channel
+    currentLoyalty: {
+      type: Number
+    },
+    totalLoyalty: {
+      type: Number
+    },
+    loyaltyBadge: {
+      type: String
+    }
+  }
+}
 
 const User = mongoose.model('User', userSchema);
 
