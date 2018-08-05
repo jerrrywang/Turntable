@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 
-export class Leaderboard extends Component {
+export default class Leaderboard extends Component {
   // constructor(props){
   //   super(props);
   //   this.state = {

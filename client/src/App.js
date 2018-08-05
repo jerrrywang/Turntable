@@ -1,35 +1,76 @@
 import React, {Component} from 'react';
 import './App.css';
+import Extension from './components/Extension';
+import Modal from 'react-modal';
+import Leaderboard from './components/leaderboard';
+import Banner from './components/song_vote';
 const ngrok = "https://81139028.ngrok.io";
-
 const update = (user_id, type, toBeUpdated) => {
     fetch(`${ngrok}/update`, {
         method: 'POST',
         body: {
-            user_id,
-            type,
-            toBeUpdated
+            user_id: user_id,
+            type: type,
+            toBeUpdated: toBeUpdated
         }
     })
 };
-
 class App extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            user: null,
+            user: {
+                twitchId: 245208288,
+                isSubbed: true,
+                streak: 0,
+                loyaltyRate: 0,
+                currentLoyalty: 500,
+                totalLoyalty: 100,
+                djElo: 897,
+                songsQueued: 8,
+                djBadge: 'Unranked',
+                loyaltyBadge: {
+                    innerLocal: 'Fan',
+                    outerGlobal: 'Veteran'
+                }
+            },
             twitchId: null,
             isEarly: false,
+            upvotes: 0,
+            downvotes: 0,
+            vote: ``,
             baseRate: 5, //per min, 300 per hour
             bonusSubRate: 5,
             bonusStreakRate: 1, //increases per hour watched
             queuePrice: 200,
             genrePrice: 350,
-            started: false
-        }
+            showModel: false,
+            nowPlaying: {
+                coverArt: 'http://artwork-cdn.7static.com/static/img/sleeveart/00/004/056/0000405628_350.jpg',
+                artist: 'Kanye West',
+                title: 'Stronger'
+            },
+            leaderboard: [
+                {
+                    3500: {
+                        user: 'Jerrito'
+                    }
+                }, {
+                    3134: {
+                        user: 'Salman'
+                    }
+                }, {
+                    2897: {
+                        user: 'Benito'
+                    }
+                }
+            ]
+        };
+        this.handleOpenModal = this.handleOpenModal.bind(this);
+        this.handleCloseModal = this.handleCloseModal.bind(this);
     }
-
     componentDidMount() {
+        var self = this;
         //When the component mounts, request ID share
         window.Twitch.ext.actions.requestIdShare();
         //if yes, onAuthorized() will be invoked with the user's id
@@ -41,45 +82,51 @@ class App extends Component {
                     "Content-Type": "application/json; charset=utf-8",
                     "Authorization": `Bearer ${auth.token}`
                 }
-            }).then(resp => {
-                this.setState({user: resp, twitchId: resp.twitchId}, () => {
-                    let user = this.state.user;
-                    //ON MINUTE LOYALTY
-                    setInterval(function() { //also should be a setTimeout with anonymous function
-                        let initialRate = this.state.baseRate;
-                        let finalRate;
-                        let loyaltyRate;
-                        finalRate = initialRate + user.streak * this.state.bonusStreakRate;
-                        update(this.state.twitchId, "loyaltyRate", finalRate);
-                        update(this.state.twitchId, "currentLoyalty", user.currentLoyalty + user.loyaltyRate);
-
-                        this.setState({
-                            user: {
-                                loyaltyRate: finalRate
-                            }
-                        });
-
-                        this.setState({
-                            user: {
-                                currentLoyalty: user.currentLoyalty + user.loyaltyRate
-                            }
-                        });
-
-                        this.setState({
-                            user: {
-                                totalLoyalty: user.totalLoyalty + user.loyaltyRate
-                            }
-                        });
-                        update(this.state.twitchId, "totalLoyalty", user.totalLoyalty + user.loyaltyRate);
-                    }, 1000 * 60)
-
-
-                });
-            }).then
-                .catch(err => console.log(err))
+            }).then(result => result.json())
+                .then(resp => {
+                    console.log(resp);
+                    console.log("Got a response back after sending in auth token");
+                    console.log("this:", this);
+                    console.log("self:", self);
+                    self.setState({user: resp, twitchId: resp.twitchId}, () => {
+                        console.log(self.state);
+                        let user = self.state.user;
+                        //ON MINUTE LOYALTY
+                        console.log("before first set interval");
+                        setInterval(function() { //also should be a setTimeout with anonymous function
+                            let initialRate = self.state.baseRate;
+                            let finalRate = initialRate + user.streak * self.state.bonusStreakRate;
+                            const currentState = {...self.state};
+                            currentState.user.loyaltyRate = finalRate;
+                            currentState.user.currentLoyalty = user.currentLoyalty + finalRate;
+                            currentState.user.totalLoyalty = user.totalLoyalty + finalRate;
+                            self.setState(currentState);
+                            update(self.state.twitchId, "loyaltyRate", finalRate);
+                            update(self.state.twitchId, "currentLoyalty", user.currentLoyalty + finalRate);
+                            update(self.state.twitchId, "totalLoyalty", user.totalLoyalty + finalRate);
+                        }, 1000 * 60);
+                        console.log("before second set interval");
+                        setInterval(function() {
+                            const currState = {...self.state};
+                            currState.user.streak = self.state.user.streak + 1;
+                            self.setState(currState);
+                            update(self.state.twitchId, "streak", self.state.user.streak + 1);
+                            let user = self.state.user;
+                            let initialRate = self.state.baseRate;
+                            let finalRate;
+                            finalRate = initialRate + user.streak * self.state.bonusStreakRate;
+                            this.setState({
+                                user: {
+                                    loyaltyRate: finalRate
+                                }
+                            });
+                            update(self.state.twitchId, "loyaltyRate", finalRate);
+                        }, 1000 * 60 * 60);
+                        console.log("end...right before catch")
+                    });
+                }).catch(err => console.log(err))
         });
     }
-
     // isEarly = () => {
     //     fetch(`https://api.twitch.tv/kraken/streams/`, {
     //         headers: {
@@ -123,92 +170,91 @@ class App extends Component {
     //         .catch(error)
     // }
     //
-    updateLoyaltyRate = () => {
-        let user = this.state.user;
-        let initialRate = this.state.baseRate;
-        let finalRate;
-        // if (user.isSubbed) {
-        //     finalRate = initialRate + this.state.bonusSubRate + user.streak * this.state.bonusStreakRate
-        //     this.setState({
-        //         user: {
-        //             loyaltyRate: finalRate
-        //         }
-        //     });
-        //     update(this.state.twitchId, "loyaltyRate", finalRate);
-        // } else {
-            finalRate = initialRate + user.streak * this.state.bonusStreakRate;
-            this.setState({
-                user: {
-                    loyaltyRate: finalRate
-                }
-            });
-            update(this.state.twitchId, "loyaltyRate", finalRate);
-        // }
-
-    };
+    // updateLoyaltyRate = () => {
+    //     let user = this.state.user;
+    //     let initialRate = this.state.baseRate;
+    //     let finalRate;
+    //     // if (user.isSubbed) {
+    //     //     finalRate = initialRate + this.state.bonusSubRate + user.streak * this.state.bonusStreakRate
+    //     //     this.setState({
+    //     //         user: {
+    //     //             loyaltyRate: finalRate
+    //     //         }
+    //     //     });
+    //     //     update(this.state.twitchId, "loyaltyRate", finalRate);
+    //     // } else {
+    //         finalRate = initialRate + user.streak * this.state.bonusStreakRate;
+    //         this.setState({
+    //             user: {
+    //                 loyaltyRate: finalRate
+    //             }
+    //         });
+    //         update(this.state.twitchId, "loyaltyRate", finalRate);
+    //     // }
     //
-    updateStreak = () => { //probably should change to setTimeout with an anonymous function but idk how to
-        setInterval(function() {
-            this.setState({
-                user: {
-                    streak: this.state.user.streak + 1
-                }
-            });
-            update(this.state.twitchId, "streak", this.state.user.streak + 1);
-            let user = this.state.user;
-            let initialRate = this.state.baseRate;
-            let finalRate;
-            finalRate = initialRate + user.streak * this.state.bonusStreakRate;
-            this.setState({
-                user: {
-                    loyaltyRate: finalRate
-                }
-            });
-            update(this.state.twitchId, "loyaltyRate", finalRate);
-        }, 1000 * 60 * 60)
-    };
-
-    onMinuteLoyalty = () => { //adds loyaltyRate to total and current loyalty every minute
-        let user = this.state.user;
-        setInterval(function() { //also should be a setTimeout with anonymous function
-            let initialRate = this.state.baseRate;
-            let finalRate;
-            finalRate = initialRate + user.streak * this.state.bonusStreakRate;
-            this.setState({
-                user: {
-                    loyaltyRate: finalRate
-                }
-            });
-            update(this.state.twitchId, "loyaltyRate", finalRate);
-            this.setState({
-                user: {
-                    currentLoyalty: user.currentLoyalty + user.loyaltyRate
-                }
-            });
-            update(this.state.twitchId, "currentLoyalty", user.currentLoyalty + user.loyaltyRate);
-            this.setState({
-                user: {
-                    totalLoyalty: user.totalLoyalty + user.loyaltyRate
-                }
-            });
-            update(this.state.twitchId, "totalLoyalty", user.totalLoyalty + user.loyaltyRate);
-        }, 1000 * 60)
-    };
+    // };
     //
-    onVote = () => {
-        this.setState({
-            user: {
-                currentLoyalty: this.state.user.currentLoyalty + 10
-            }
-        });
-        update(this.state.twitchId, "currentLoyalty", this.state.user.currentLoyalty + 10);
-        this.setState({
-            user: {
-                totalLoyalty: this.state.user.currentLoyalty + 10
-            }
-        });
-        update(this.state.twitchId, "totalLoyalty", this.state.user.currentLoyalty + 10);
-    }
+    // updateStreak = () => { //probably should change to setTimeout with an anonymous function but idk how to
+    //     setInterval(function() {
+    //         this.setState({
+    //             user: {
+    //                 streak: this.state.user.streak + 1
+    //             }
+    //         });
+    //         update(this.state.twitchId, "streak", this.state.user.streak + 1);
+    //         let user = this.state.user;
+    //         let initialRate = this.state.baseRate;
+    //         let finalRate;
+    //         finalRate = initialRate + user.streak * this.state.bonusStreakRate;
+    //         this.setState({
+    //             user: {
+    //                 loyaltyRate: finalRate
+    //             }
+    //         });
+    //         update(this.state.twitchId, "loyaltyRate", finalRate);
+    //     }, 1000 * 60 * 60)
+    // };
+    // onMinuteLoyalty = () => { //adds loyaltyRate to total and current loyalty every minute
+    //     let user = this.state.user;
+    //     setInterval(function() { //also should be a setTimeout with anonymous function
+    //         let initialRate = this.state.baseRate;
+    //         let finalRate;
+    //         finalRate = initialRate + user.streak * this.state.bonusStreakRate;
+    //         this.setState({
+    //             user: {
+    //                 loyaltyRate: finalRate
+    //             }
+    //         });
+    //         update(this.state.twitchId, "loyaltyRate", finalRate);
+    //         this.setState({
+    //             user: {
+    //                 currentLoyalty: user.currentLoyalty + user.loyaltyRate
+    //             }
+    //         });
+    //         update(this.state.twitchId, "currentLoyalty", user.currentLoyalty + user.loyaltyRate);
+    //         this.setState({
+    //             user: {
+    //                 totalLoyalty: user.totalLoyalty + user.loyaltyRate
+    //             }
+    //         });
+    //         update(this.state.twitchId, "totalLoyalty", user.totalLoyalty + user.loyaltyRate);
+    //     }, 1000 * 60)
+    // };
+    //
+    // onVote = () => {
+    //     this.setState({
+    //         user: {
+    //             currentLoyalty: this.state.user.currentLoyalty + 10
+    //         }
+    //     });
+    //     update(this.state.twitchId, "currentLoyalty", this.state.user.currentLoyalty + 10);
+    //     this.setState({
+    //         user: {
+    //             totalLoyalty: this.state.user.currentLoyalty + 10
+    //         }
+    //     });
+    //     update(this.state.twitchId, "totalLoyalty", this.state.user.currentLoyalty + 10);
+    // }
     //
     // onBits = (data) => {
     //     //GET https://api.twitch.tv/kraken/channel // this IS A LISTENER
@@ -226,7 +272,6 @@ class App extends Component {
     //         }
     //     })
     // }
-
     // Todo ADD GLOBAL FUNCTIONALITY (see model)
     //PubSubs for onSub, onBits
     //Buy functions
@@ -234,16 +279,119 @@ class App extends Component {
     //update djElo
     //Frontend
     //add catch
-    start = () => {
-        if (!this.state.started) {
-            this.onMinuteLoyalty();
-            this.updateStreak();
-            this.setState({started: true})
+    handleOpenModal () {
+        this.setState({ showModal: true });
+    }
+    handleCloseModal () {
+        this.setState({ showModal: false });
+    }
+
+    onSongPlay() {
+        //some kind of listener?
+        console.log('new song playing!')
+        this.setState({upvotes: 0, downvotes: 0, vote: ``})
+    }
+
+    songSkip() {
+        //some sort of emit
+    }
+
+    voteCalc() {
+        let upvotes = this.state.upvotes
+        let downvotes = this.state.downvotes
+        let decimal = upvotes / (upvotes + downvotes)
+        this.setState({
+            vote: `${Math.floor(decimal * 100)}%`
+        })
+    }
+
+    checkBadVote() {
+        if (this.state.downvotes / this.state.upvotes >= 3) {
+            this.songSkip()
         }
-    };
+    }
+    voteTester(e) {
+        e.preventDefault();
+        let user = this.state.user
+        for (var i = 0; i < 30; i++) {
+            if (Math.random() > .3) {
+                this.setState({
+                    upvotes: this.state.upvotes + 1
+                })
+                this.voteCalc()
+                this.checkBadVote()
+            } else {
+                this.setState({
+                    downvotes: this.state.downvotes + 1
+                })
+                this.voteCalc()
+                this.checkBadVote()
+            }
+            this.setState({
+                user: {
+                    twitchId: user.twitchId,
+                    isSubbed: user.isSubbed,
+                    streak: user.streak,
+                    loyaltyRate: user.loyaltyRate,
+                    currentLoyalty: this.state.user.currentLoyalty + 10,
+                    totalLoyalty: this.state.user.totalLoyalty + 10,
+                    djElo: user.djElo,
+                    songsQueued: user.songsQueued,
+                    djBadge: user.djBadge,
+                    loyaltyBadge: user.loyaltyBadge
+                }
+
+            })
+        }}
+    // onUpvote(e) {
+    //     e.preventDefault();
+    //     let user = this.state.user
+    //     this.setState({
+    //         user: {
+    //             twitchId: user.twitchId,
+    //             isSubbed: user.isSubbed,
+    //             streak: user.streak,
+    //             loyaltyRate: user.loyaltyRate,
+    //             currentLoyalty: this.state.user.currentLoyalty + 10,
+    //             totalLoyalty: this.state.user.totalLoyalty + 10,
+    //             djElo: user.djElo,
+    //             songsQueued: user.songsQueued,
+    //             djBadge: user.djBadge,
+    //             loyaltyBadge: user.loyaltyBadge
+    //         },
+    //         upvotes: this.state.upvotes + 1
+    //     })
+    //     console.log(this.state.user)
+    //     e.target.disabled = true
+    //     this.voteCalc()
+    //     this.checkBadVote()
+    // }
+
+    onDownvote(e) { //THIS NEEDS TO BE AN EMIT SO ITS ALL DISPLAYED AT ONCE
+        e.preventDefault();
+        let user = this.state.user
+        this.setState({
+            user: {
+                twitchId: user.twitchId,
+                isSubbed: user.isSubbed,
+                streak: user.streak,
+                loyaltyRate: user.loyaltyRate,
+                currentLoyalty: this.state.user.currentLoyalty + 10,
+                totalLoyalty: this.state.user.totalLoyalty + 10,
+                djElo: user.djElo,
+                songsQueued: user.songsQueued,
+                djBadge: user.djBadge,
+                loyaltyBadge: user.loyaltyBadge
+            },
+            downvotes: this.state.downvotes + 1
+        })
+        console.log(this.state.user)
+        e.target.disabled = true
+        this.voteCalc()
+        this.checkBadVote()
+    }
 
     render() {
-        this.start();
         console.log(this.state);
         const styles = {
             panelContainer: {
@@ -265,14 +413,13 @@ class App extends Component {
                 display: 'flex'
             },
             panelBodyLeft: {
-                border: '1px solid black',
+                borderRight: '1px solid black',
                 flexGrow: 1,
                 flexBasis: '50%',
                 display: 'flex',
                 flexDirection: 'column'
             },
             panelBodyRight: {
-                border: '1px solid black',
                 flexGrow: 1,
                 flexBasis: '50%',
                 display: 'flex',
@@ -281,7 +428,6 @@ class App extends Component {
                 justifyContent: 'space-evenly'
             },
             shop: {
-                border: '1px solid black',
                 flexGrow: 1,
                 flexBasis: '50%',
                 display: 'flex',
@@ -289,21 +435,26 @@ class App extends Component {
                 justifyContent: 'center'
             },
             leaderboard: {
-                border: '1px solid black',
-                flexGrow: 1
+                flexGrow: 1,
+                flexBasis: '50%',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: '18px'
             },
             leaderboardContainer: {
-                border: '1px solid black',
                 display: 'flex',
                 flexDirection: 'column',
                 width: '80%',
+                height: '80%',
             },
-
             leaderboardSlot: {
                 flexGrow: 1,
                 flexBasis: '25%',
-                border: '1px solid black',
-                display: 'flex'
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
             },
             bottom: {
                 width: '100%',
@@ -313,49 +464,73 @@ class App extends Component {
             currentPoints: {
                 width: '80%',
                 height: '90px',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)'
+                boxShadow: '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center'
             },
             multiplier: {
                 width: '80%',
                 height: '90px',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)'
+                boxShadow: '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center'
             },
             djScore: {
                 width: '80%',
                 height: '90px',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)'
+                boxShadow: '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center'
             },
             badge: {
                 width: '80%',
                 height: '90px',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)'
+                boxShadow: '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center'
             },
             optionsContainer: {
                 width: '80%',
                 height: '80%',
-
+                marginTop: '40px'
             },
             options: {
-
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center'
             }
-        }
+        };
+        console.log("this", this);
         return (
             <div className="App">
                 <div style={styles.panelContainer} className="panelContainer">
                     <div style={styles.panelSongBanner} className="panelSongBanner">
-                        <button onClick={this.onVote}>Like</button>
-                        <button onClick={this.onVote}>Dislike</button>
+                        <Banner upvote={(e) => this.voteTester(e)} downvote={(e) => this.onDownvote(e)} skip={() => this.songSkip()} badVote={() => this.checkBadVote()} vote={this.state.vote} voteCalc={() => this.voteCalc()} startSong={() => this.onSongPlay()} nowPlaying={this.state.nowPlaying}/>
                     </div>
                     <div style={styles.panelBody} className="panelBody">
                         <div style={styles.panelBodyLeft} className="panelBodyLeft">
                             <div style={styles.shop} className="shop">
                                 <div style={styles.optionsContainer} className="optionsContainer">
-                                    <div style={styles.option} className="option">Queue a song</div>
-                                    <div style={styles.option} className="option">Buy a badge</div>
+                                    <div onClick={this.handleOpenModal}
+                                         style={styles.option} className="option">
+                                        <h3 style={{fontSize: '30px'}}>Queue a song!</h3>
+                                    </div>
+                                    <Modal isOpen={this.state.showModal}
+                                           onRequestClose={this.handleCloseModal}
+                                           contentLabel="Example Modal" >
+                                        <Extension />
+                                        <button onClick={this.handleCloseModal}>close</button>
+                                    </Modal>
                                 </div>
                             </div>
                             <div style={styles.leaderboard} className="leaderboard">
+                                <h3 className="leaderboardHead">Leaderboard</h3>
                                 <div style={styles.leaderboardContainer} className="leaderboardContainer">
+                                    <span style={styles.bottom} className="bottom"></span>
                                     <div style={styles.leaderboardSlot} className="leaderboardSlot">
                                         1. benito
                                     </div>
@@ -370,29 +545,28 @@ class App extends Component {
                                     <span style={styles.bottom} className="bottom"></span>
                                     <div style={styles.leaderboardSlot} className="leaderboardSlot">
                                         24. hctiwt</div>
+                                    <span style={styles.bottom} className="bottom"></span>
                                 </div>
-
                             </div>
                         </div>
                         <div style={styles.panelBodyRight} className="panelBodyRight">
                             <div style={styles.currentPoints} className="currentPoints">
-                                90
+                                {this.state.user.currentLoyalty}
                                 <br />
                                 Current points
                             </div>
                             <div style={styles.multiplier} className="multiplier">
-                                2.3x
+                                {this.state.user.loyaltyRate}x
                                 <br />
                                 Multiplier
                             </div>
                             <div style={styles.djScore} className="djScore">
-                                875/1000
+                                {this.state.user.djElo}/1000
                                 <br />
                                 DJ Score
                             </div>
                             <div style={styles.badge} className="badge">
-                                BADGE IMG
-                                {this.state.twitchId}
+                                8 songs queued
                             </div>
                         </div>
                     </div>
@@ -401,5 +575,4 @@ class App extends Component {
         );
     }
 }
-
 export default App;
