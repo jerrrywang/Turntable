@@ -1,22 +1,35 @@
 import React, {Component} from 'react';
 
 export class Leaderboard extends Component {
-  constructor(props){
-    super(props);
-    this.state = {
-      users: null
-    }
-  }
+  // constructor(props){
+  //   super(props);
+  //   this.state = {
+  //     users: null
+  //   }
+  // }
 
-componentDidMount() {
-  
-}
+  //top 5 users by totalPoints
+  //current user's rank
 
-  runder() {
-    return (
-      <div>
-        {.sort(function(a,b){b-a})}
-      </div>
-    )
+  render() {
+    console.log('LEADERBOARD: ', this.props.leaderboard)
+    return (<div styles={{
+        border: '1px solid black'
+      }}>
+      <ol>
+        {
+          this.props.leaderboard.map((leader) => {
+            for (var key in leader) {
+              console.log(leader[key]['user'])
+              return (<li>
+                {leader[key]['user']}
+                <br/> {key}
+              </li>)
+            }
+
+          })
+        }
+      </ol>
+    </div>)
   }
 }

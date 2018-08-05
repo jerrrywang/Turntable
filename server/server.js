@@ -66,29 +66,27 @@ app.get('/test', (req, res) => {
 });
 
 app.post('/queue', (req, res) => {
-    console.log("req.bodyu:", req.body);
     var newSong = new Song(req.body);
     newSong.save().then(resp => {
         res.send('Success');
-        console.log(resp);
     }).catch(err => console.log(err))
 });
 
-app.get('/getqueue', (req, res) => {
-    console.log('hit get q');
+app.get('/remove', (req, res) => {
+    Song.findOneAndRemove()
+        .then(resp => res.send("Removed"))
+        .catch(err => console.log(err))
+});
 
+app.get('/getqueue', (req, res) => {
     Song.find()
         .then(resp => {
-            console.log(resp);
             res.send(resp);
         })
         .catch(err => console.log(err))
 });
 
-app.get('/')
-
 app.post('/update', (req, res) => {
-    //Receive req.body.user_id, type, toBeUpdated
     User.findOne({
         token: {
             user_id: req.body.user_id
