@@ -2,7 +2,9 @@
 My team and I created a Twitch extension for viewers (called Turntable) and a music player for streamers at the 2018 Twitch Hackathon.
 We had to make use of Twitch's API and the Universal Music Group catalogue.
 
-Technologies involved: React.js, Electron.js, Node.js, Express.js, MongoDB
+Technologies involved: React.js, Electron.js, Node.js, Express.js, MongoDB.
+
+Finished 2nd place.
 
 Here is a general summary of the problem we identified and our solution to it:
 
