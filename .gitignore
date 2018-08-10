@@ -60,6 +60,7 @@ typings/
 
 # next.js build output
 .next
+<<<<<<< HEAD
 =======
 env.sh
 env
@@ -67,3 +68,11 @@ env
 node_modules
 client.zip
 >>>>>>> components
+=======
+
+env.sh
+node_modules
+.idea
+env
+package-lock.json
+>>>>>>> 84ebb6c35afc3e90cc424ed32b4cd793d437f9f5
