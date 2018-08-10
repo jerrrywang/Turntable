@@ -1,4 +1,4 @@
-# twitch-hackathon
+# Turntable
 My team and I created a <b>Twitch extension for viewers (called Turntable)</b> and a <b>music player for streamers</b> at the 2018 Outside Lands Twitch Hackathon.
 We had to make use of <b>Twitch's API and the Universal Music Group catalogue</b>.
 
