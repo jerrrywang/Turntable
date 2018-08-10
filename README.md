@@ -2,6 +2,8 @@
 My team and I created a Twitch extension for viewers (called Turntable) and a music player for streamers at the 2018 Twitch Hackathon.
 We had to make use of Twitch's API and the Universal Music Group catalogue.
 
+Technologies involved: React.js, Electron.js, Node.js, Express.js, MongoDB
+
 Here is a general summary of the problem we identified and our solution to it:
 
 Currently, the only way viewers can successfully interact with their favorite streamers is to send them a direct message, which requires spending money on donations or subscriptions. That leaves many of their viewers, who are broke college students, unable to directly interact with their favorite streamers besides the only other alternative: competing with thousands of other viewers in a chaotic chat room. 
@@ -22,6 +24,6 @@ And to regulate the queue and filter out trolls, viewers are rewarded with ardor
 
 Finally, after a viewer’s song plays, the rating of that song contributes to that viewer’s DJ score, which is an average of all the ratings of the songs that viewer has queued. The viewer with the highest DJ score is designated as the stream’s top DJ and is rewarded with unique badges and more power over the streamer’s music.
 
-Going forward we want to create more options for viewers to spend ardor on such as polls and direct messages to streamers. We’d also like to integrate the music player we built to the Twitch streamer dashboard.
+Going forward we want to create more options for viewers to spend ardor on such as polls and direct messages to streamers. We’d also like to integrate the music player we built to the Twitch streamer dashboard and style our extension to be more consistent with Twitch's UI.
 
 Unfortunately, wealth has become an indicator of loyalty for Twitch viewers. Turntable aims to give dedicated fans the rewards they deserve. 
