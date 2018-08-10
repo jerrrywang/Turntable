@@ -59,3 +59,9 @@ typings/
 
 # next.js build output
 .next
+
+env.sh
+node_modules
+.idea
+env
+package-lock.json
