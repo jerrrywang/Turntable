@@ -1,0 +1,41 @@
+{
+  "name": "music-player",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "classnames": "^2.2.6",
+    "concurrently": "^3.6.1",
+    "express": "^4.16.3",
+    "mongoose": "^5.2.6",
+    "oauth-signature": "^1.5.0",
+    "react": "^0.14.8",
+    "react-autocomplete": "^1.0.0-rc2",
+    "react-dom": "^0.14.7",
+    "react-scripts": "1.1.4",
+    "react-sound": "^0.4.0",
+    "soundmanager2": "^2.97.20150601-a",
+    "underscore": "^1.9.1",
+    "wait-on": "^2.1.0"
+  },
+  "files": [
+    "*.js",
+    "build",
+    "node_modules"
+  ],
+  "homepage": "./",
+  "main": "electron.js",
+  "scripts": {
+    "react-start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject",
+    "electron": "electron .",
+    "dev": "nf start",
+    "start": "npm run dev"
+  },
+  "devDependencies": {
+    "electron": "^2.0.6",
+    "foreman": "^3.0.1"
+  }
+}

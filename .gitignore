@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Logs
 logs
 *.log
@@ -59,3 +60,10 @@ typings/
 
 # next.js build output
 .next
+=======
+env.sh
+env
+.idea
+node_modules
+client.zip
+>>>>>>> components
