@@ -1,10 +1,10 @@
 # Turntable
-My team and I created a <b>Twitch extension for viewers (called Turntable)</b> and a <b>music player for streamers</b> at the 2018 Outside Lands Twitch Hackathon.
+My team and I created a <b>Twitch extension for viewers (called Turntable)</b> and a <b>music player for streamers</b> at the <b>2018 Outside Lands Twitch Hackathon</b>.\
 We had to make use of <b>Twitch's API and the Universal Music Group catalogue</b>.
 
 Technologies involved: <b>React.js, Electron.js, Node.js, Express.js, MongoDB</b>.
 
-Finished 2nd place.
+Finished <b>2nd place</b>.
 
 Here is a general summary of the problem we identified and our solution to it:
 
