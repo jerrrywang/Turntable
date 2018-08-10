@@ -1,8 +1,8 @@
 # twitch-hackathon
-My team and I created a Twitch extension for viewers (called Turntable) and a music player for streamers at the 2018 Twitch Hackathon.
-We had to make use of Twitch's API and the Universal Music Group catalogue.
+My team and I created a <b>Twitch extension for viewers (called Turntable)</b> and a <b>music player for streamers</b> at the 2018 Outside Lands Twitch Hackathon.
+We had to make use of <b>Twitch's API and the Universal Music Group catalogue</b>.
 
-Technologies involved: React.js, Electron.js, Node.js, Express.js, MongoDB.
+Technologies involved: <b>React.js, Electron.js, Node.js, Express.js, MongoDB</b>.
 
 Finished 2nd place.
 
