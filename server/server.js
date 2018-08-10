@@ -49,18 +49,9 @@ app.use(function (req, res, next) {
 })
 
 io.on("connection", client => {
-    client.on("getUser", (id) => {
-        User.findOne({
-            token: {
-                user_id: req.body.user_id
-            }
-        }).then(user => {
-            client.emit("gotUser", user)
-        })
-            .catch(err => console.log(err))
-    });
+    console.log("user has connected");
+});
 
-})
 app.get('/test', (req, res) => {
     res.send("Yup, this test is working!")
 });
@@ -87,10 +78,10 @@ app.get('/getqueue', (req, res) => {
 });
 
 app.post('/update', (req, res) => {
+    console.log("updating:", req.body);
+    let toBeUpdated = req.body.toBeUpdated;
     User.findOne({
-        token: {
-            user_id: req.body.user_id
-        }
+        twitchId: req.body.twitchId
     }).then(
         user => {
             switch(req.body.type) {
@@ -99,55 +90,53 @@ app.post('/update', (req, res) => {
                     user.save()
                         .then(response => console.log("Saved:", response))
                         .catch(err => console.log(err))
-                    ;
-                case "isSubbed":
-                    user.streak = toBeUpdated;
-                    user.save()
-                        .then(response => console.log("Saved:", response))
-                        .catch(err => console.log(err))
-                    ;
+                    break;
                 case "loyaltyRate":
                     user.loyaltyRate = toBeUpdated;
                     user.save()
                         .then(response => console.log("Saved:", response))
                         .catch(err => console.log(err))
-                    ;
+                    break;
                 case "currentLoyalty":
                     user.currentLoyalty = toBeUpdated;
                     user.save()
-                        .then(response => console.log("Saved:", response))
-                        .catch(err => console.log(err))
-                    ;
+                        .then(response => {
+                            res.send("Updated current loyalty");
+                            console.log("Saved:", response)
+                        })
+                        .catch(err => console.log(err));
+                    break;
                 case "totalLoyalty":
                     user.totalLoyalty = toBeUpdated;
                     user.save()
                         .then(response => console.log("Saved:", response))
-                        .catch(err => console.log(err))
-                    ;
+                        .catch(err => console.log(err));
+                    break;
                 case "djElo":
                     user.djElo = toBeUpdated;
                     user.save()
                         .then(response => console.log("Saved:", response))
-                        .catch(err => console.log(err))
-                    ;
+                        .catch(err => console.log(err));
+                    break;
                 case "songsQueued":
                     user.songsQueued = toBeUpdated;
                     user.save()
                         .then(response => console.log("Saved:", response))
-                        .catch(err => console.log(err))
-                    ;
+                        .catch(err => console.log(err));
+                    break;
+
                 case "djBadge":
                     user.djBadge = toBeUpdated;
                     user.save()
                         .then(response => console.log("Saved:", response))
-                        .catch(err => console.log(err))
-                    ;
+                        .catch(err => console.log(err));
+                    break;
                 case "loyaltyBadge":
                     user.loyaltyBadge = toBeUpdated;
                     user.save()
                         .then(response => console.log("Saved:", response))
                         .catch(err => console.log(err))
-                    ;
+                    break;
             }
         }
     )
@@ -206,6 +195,6 @@ app.get('/auth', (req, res) => {
 });
 
 
-http.listen(1337, () => {
-    console.log('listening on *:3000');
+http.listen(8080, () => {
+    console.log('listening on *:8080');
 });

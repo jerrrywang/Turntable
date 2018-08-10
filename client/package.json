@@ -2,9 +2,10 @@
   "name": "twitch_loyalty",
   "version": "0.1.0",
   "private": true,
-  "proxy": "http://localhost:1337",
+  "proxy": "http://localhost:8080",
   "dependencies": {
     "@material-ui/core": "^1.4.3",
+    "lodash": "^4.17.10",
     "oauth-signature": "^1.5.0",
     "react": "^16.4.2",
     "react-autocomplete": "^1.8.1",

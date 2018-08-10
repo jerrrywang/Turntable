@@ -3,12 +3,7 @@ const mongoose = require('mongoose');
 const userSchema = mongoose.Schema({
     twitchId: String,
     token: {
-      type: Object,
-      required: true
-    },
-    isSubbed: {
-        type: Boolean,
-        default: false
+      type: Object
     },
     streak: {
       type: Number,
