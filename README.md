@@ -6,7 +6,7 @@ Technologies involved: <b>React.js, Electron.js, Node.js, Express.js, MongoDB</b
 
 Finished <b>2nd place</b>.
 
-Here is a general summary of the problem we identified and our solution to it:
+The following is our pitch script:
 
 Currently, the only way viewers can successfully interact with their favorite streamers is to send them a direct message, which requires spending money on donations or subscriptions. That leaves many of their viewers, who are broke college students, unable to directly interact with their favorite streamers besides the only other alternative: competing with thousands of other viewers in a chaotic chat room. 
 
